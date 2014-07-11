@@ -7,12 +7,32 @@
   <description>Adds seed URLs and redirect entries directly to a Nutch 2.x crawl DB</description>
   <properties>
     <nutch.version>2.2.1</nutch.version>
+    <hadoop.version>1.2.0</hadoop.version>
+    <gora.version>0.3</gora.version>
   </properties>
   <dependencies>
     <dependency>
       <groupId>org.apache.nutch</groupId>
       <artifactId>nutch</artifactId>
       <version>${nutch.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-core</artifactId>
+      <version>${hadoop.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.gora</groupId>
+      <artifactId>gora-core</artifactId>
+      <version>${gora.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.5</version>
     </dependency>
   </dependencies>
 </project>
