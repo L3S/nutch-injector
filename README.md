@@ -20,7 +20,7 @@ Usage
 	Injector injector = new Injector(conf[, crawlId]);
 	
 	injector.inject("http://www.l3s.de/");
-	injector.addRedirect("http://t.co/hoinb", "http://www.l3s.de/");
+	injector.addRedirect("http://t.co/ZNyOoEwAwN", "http://www.l3s.de/");
 	
 	Map<String, String> metadata = new HashMap<>();
 	metadata.add("source", "#l3s");
@@ -30,4 +30,5 @@ Usage
 License
 -------
 
-This code can be used under the Apache License 2.0 (see http://www.apache.org/licenses/).
+This code can be used under the Apache License Version 2.0 (see 
+http://www.apache.org/licenses/).

@@ -13,13 +13,13 @@ import org.apache.nutch.crawl.CrawlStatus;
 import org.apache.nutch.crawl.DbUpdaterJob;
 import org.apache.nutch.crawl.InjectorJob;
 import org.apache.nutch.fetcher.FetcherJob;
+import org.apache.nutch.metadata.Nutch;
 import org.apache.nutch.protocol.ProtocolStatusCodes;
 import org.apache.nutch.protocol.ProtocolStatusUtils;
 import org.apache.nutch.storage.Mark;
 import org.apache.nutch.storage.StorageUtils;
 import org.apache.nutch.storage.WebPage;
 import org.apache.nutch.util.TableUtil;
-import org.apache.nutch.util.URLUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +33,26 @@ public class Injector {
     private final float defaultScore;
     private final int defaultInterval;
 
+    public Injector(Configuration conf) throws InjectorSetupException {
+        this(conf, "");
+    }
+
     public Injector(Configuration conf, String crawlId) throws InjectorSetupException {
+        this(conf, createStore(conf, crawlId));
+    }
+
+    public Injector(Configuration conf, DataStore<String, WebPage> store)
+            throws InjectorSetupException {
+        this.store = store;
+        defaultScore = conf.getFloat("db.score.injected", 1.0f);
+        defaultInterval = conf.getInt("db.fetch.interval.default", 2592000);
+    }
+
+    static DataStore<String, WebPage> createStore(Configuration conf, String crawlId)
+            throws InjectorSetupException {
         try {
-            store = StorageUtils.createWebStore(conf, String.class,
-                WebPage.class);
-            defaultScore = conf.getFloat("db.score.injected", 1.0f);
-            defaultInterval = conf.getInt("db.fetch.interval.default", 2592000);
+            conf.set(Nutch.CRAWL_ID_KEY, crawlId);
+            return StorageUtils.createWebStore(conf, String.class, WebPage.class);
         } catch (ClassNotFoundException e) {
             throw new InjectorSetupException("Missing class for Gora storage", e);
         } catch (GoraException e) {
@@ -47,8 +61,15 @@ public class Injector {
     }
 
     public boolean hasUrl(String url) {
-        WebPage webPage = store.get(url, array(WebPage.Field.STATUS.getName()));
-        return webPage != null;
+        try {
+            String key = TableUtil.reverseUrl(url);
+            WebPage webPage = store.get(key, array(WebPage.Field.STATUS.getName()));
+            return webPage != null;
+        } catch (NullPointerException e) { // MemStore.get fails on missing keys
+            return false;
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("Not a valid URL: " + url, e);
+        }
     }
 
     public boolean inject(String url) throws InjectorInjectionException {
@@ -97,8 +118,7 @@ public class Injector {
         WebPage page = new WebPage();
         page.putToOutlinks(new Utf8(to), new Utf8());
         page.putToMetadata(FetcherJob.REDIRECT_DISCOVERED, TableUtil.YES_VAL);
-        String reprUrl = URLUtil.chooseRepr(from, to, false);
-        page.setReprUrl(new Utf8(reprUrl));
+        page.setReprUrl(new Utf8(to));
         page.setFetchTime(System.currentTimeMillis());
         page.setProtocolStatus(ProtocolStatusUtils.makeStatus(ProtocolStatusCodes.MOVED, to));
         page.setStatus(CrawlStatus.STATUS_REDIR_PERM);
