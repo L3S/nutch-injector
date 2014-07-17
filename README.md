@@ -33,6 +33,7 @@ Include the module through Maven:
 	    <url>http://maven.l3s.uni-hannover.de:8088/nexus/content/repositories/icrawl_release/</url>
 	  </repository>
 	</repositories>
+```
 
 and use it in your Java code:
 
