@@ -264,6 +264,63 @@ public class Injector implements Closeable {
         return values;
     }
 
+    /**
+     * Write a document to the CrawlDB.
+     *
+     * If the document has been stored already, it is not overwritten.The fields
+     * <code>prevFetchTime</code> and <code>protocolStatus</code> are not
+     * handled yet.
+     *
+     * @param url
+     *            the URL of the web page, also used as the <code>baseUrl</code>
+     * @param content
+     *            the actual content of the page
+     * @param contentType
+     *            MIME type of the content
+     * @param headers
+     *            protocol headers
+     * @param metadata
+     *            additional metadata
+     * @param batchId
+     *            the batch this document is associated with, used by other
+     *            Nutch jobs
+     * @return true if the document was inserted, false if there is a document
+     *         for this URL already
+     * @throws InjectorInjectionException
+     *             when the URL is invalid
+     */
+    public boolean writeDocument(String url, byte[] content, String contentType,
+            Map<String, String> headers, Map<String, String> metadata, String batchId)
+            throws InjectorInjectionException {
+        if (hasUrl(url)) {
+            return false;
+        }
+        WebPage page = new WebPage();
+        page.setStatus(CrawlStatus.STATUS_FETCHED);
+        page.setFetchTime(System.currentTimeMillis());
+
+        if (content != null) {
+            page.setContent(ByteBuffer.wrap(content));
+            page.setContentType(new Utf8(contentType));
+            page.setBaseUrl(new Utf8(url));
+        }
+
+        if (metadata != null) {
+            for (Map.Entry<String, String> entry : metadata.entrySet()) {
+                Utf8 key = new Utf8(entry.getKey());
+                ByteBuffer value = ByteBuffer.wrap(entry.getValue().getBytes(UTF_8));
+                page.putToMetadata(key, value);
+            }
+        }
+
+        page.putToMarkers(DbUpdaterJob.DISTANCE, ZERO_STRING);
+
+        Mark.FETCH_MARK.putMark(page, batchId);
+
+        putRow(url, page, true);
+        return true;
+    }
+
     @Override
     public void close() throws IOException {
         store.close();
