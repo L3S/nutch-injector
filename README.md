@@ -16,6 +16,26 @@ to avoid re-crawling the same URL.
 Usage
 -----
 
+Include the module through Maven:
+
+```xml
+	<dependencies>
+	  <dependency>
+	    <groupId>de.l3s.icrawl</groupId>
+	    <artifactId>nutch-injector</artifactId>
+	    <version>0.1</version>
+	  </dependency>
+	</dependencies>
+	
+	<repositories>
+	  <repository>
+	    <id>icrawl-releases</id>
+	    <url>http://maven.l3s.uni-hannover.de:8088/nexus/content/repositories/icrawl_release/</url>
+	  </repository>
+	</repositories>
+
+and use it in your Java code:
+
 ```java
 	Injector injector = new Injector(conf[, crawlId]);
 	
