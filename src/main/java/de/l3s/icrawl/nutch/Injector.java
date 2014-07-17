@@ -1,5 +1,7 @@
 package de.l3s.icrawl.nutch;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
@@ -25,22 +27,56 @@ import org.slf4j.LoggerFactory;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class Injector {
+/**
+ * Write data to a Nutch 2.x CrawlDB.
+ *
+ * For now, this skips any configured URL filters and URL normalizers.
+ */
+public class Injector implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(Injector.class);
     private static final Utf8 ZERO_STRING = new Utf8("0");
     private static final Utf8 YES_STRING = new Utf8("y");
     private final DataStore<String, WebPage> store;
+    /** Score for injected pages, unless overridden my metadata. */
     private final float defaultScore;
+    /** Fetch interval for injected pages, unless overridden my metadata. */
     private final int defaultInterval;
 
+    /**
+     * Create injector for the default CrawlDB.
+     *
+     * @param conf
+     *            the configuration for Nutch & Hadoop
+     * @throws InjectorSetupException
+     *             if we cannot connect to the CrawlDB
+     */
     public Injector(Configuration conf) throws InjectorSetupException {
         this(conf, "");
     }
 
+    /**
+     * Create injector for the named crawl.
+     *
+     * @param conf
+     *            the configuration for Nutch & Hadoop
+     * @param crawlId
+     *            a string refering to an existing CrawlDB.
+     * @throws InjectorSetupException
+     *             if we cannot connect to the CrawlDB
+     */
     public Injector(Configuration conf, String crawlId) throws InjectorSetupException {
         this(conf, createStore(conf, crawlId));
     }
 
+    /**
+     * Create injector for the given CrawlDB,
+     *
+     * @param conf
+     *            the configuration for Nutch & Hadoop
+     * @param store
+     *            connection to the CrawlDB
+     * @throws InjectorSetupException
+     */
     public Injector(Configuration conf, DataStore<String, WebPage> store)
             throws InjectorSetupException {
         this.store = store;
@@ -48,6 +84,7 @@ public class Injector {
         defaultInterval = conf.getInt("db.fetch.interval.default", 2592000);
     }
 
+    /** Create datastore for crawlId and wrap thrown exceptions. */
     static DataStore<String, WebPage> createStore(Configuration conf, String crawlId)
             throws InjectorSetupException {
         try {
@@ -60,6 +97,13 @@ public class Injector {
         }
     }
 
+    /**
+     * Test if a given URL is in the CrawlDB.
+     *
+     * @param url
+     *            the URL to check
+     * @return true, iff an entry for the URL is stored in the DB
+     */
     public boolean hasUrl(String url) {
         try {
             String key = TableUtil.reverseUrl(url);
@@ -72,20 +116,51 @@ public class Injector {
         }
     }
 
+    /**
+     * Add a new seed URL to the CrawlDB, if it doesn't exist yet.
+     *
+     * @param url
+     *            the URL to add
+     * @return false, if the URL is already in the DB, true otherwise
+     * @throws InjectorInjectionException
+     *             when url is not a valid URL
+     */
     public boolean inject(String url) throws InjectorInjectionException {
         return inject(url, Collections.<String, String> emptyMap());
     }
 
+    /**
+     * Add a new seed URL to the CrawlDB, if it doesn't exist yet.
+     *
+     * @param url
+     *            the URL to add
+     * @param metadata
+     *            additional metadata to store in the DB. InjectorJob metadata
+     *            (nutch.score and nutch.fetchInterval) is handled correctly.
+     * @return false, if the URL is already in the DB, true otherwise
+     * @throws InjectorInjectionException
+     *             when url is not a valid URL
+     */
     public boolean inject(String url, Map<String, String> metadata) throws InjectorInjectionException {
         if (hasUrl(url)) {
             return false;
         }
-        WebPage webPage = createWebPage(url, metadata);
+        WebPage webPage = createSeedWebPage(url, metadata);
 
         putRow(url, webPage, true);
         return true;
     }
 
+    /**
+     * Save a row in the store.
+     *
+     * @param url
+     *            the row key
+     * @param webPage
+     *            the row value
+     * @param flush
+     *            if true, force a write afterwards
+     */
     private void putRow(String url, WebPage webPage, boolean flush) throws InjectorInjectionException {
         String rowKey;
         try {
@@ -99,22 +174,47 @@ public class Injector {
         }
     }
 
+    /**
+     * Store a redirect in the crawl DB, unless there is already an entry.
+     *
+     * @param fromUrl
+     *            the redirecting URL
+     * @param toUrl
+     *            the redirect target URL
+     * @return false, if the redirecting URL is already stored
+     * @throws InjectorInjectionException
+     *             when one of the URLs is not valid
+     */
     public boolean addRedirect(String fromUrl, String toUrl) throws InjectorInjectionException {
         return addRedirect(fromUrl, toUrl, Collections.<String, String> emptyMap());
     }
 
-    public boolean addRedirect(String from, String to, Map<String, String> metadata)
+    /**
+     * Store a redirect in the crawl DB, unless there is already an entry.
+     *
+     * @param fromUrl
+     *            the redirecting URL
+     * @param toUrl
+     *            the redirect target URL
+     * @param metadata
+     *            additional metadata. The data is added to all created rows
+     * @return false, if the redirecting URL is already stored
+     * @throws InjectorInjectionException
+     *             when one of the URLs is not valid
+     */
+    public boolean addRedirect(String fromUrl, String toUrl, Map<String, String> metadata)
             throws InjectorInjectionException {
-        if (hasUrl(from)) {
+        if (hasUrl(fromUrl)) { // TODO maybe also check if URL has already been fetched
             return false;
         }
-        WebPage redirect = createRedirect(from, to, metadata);
-        putRow(from, redirect, false);
-        inject(to, metadata);
+        WebPage redirect = createRedirectWebPage(fromUrl, toUrl, metadata);
+        putRow(fromUrl, redirect, false);
+        inject(toUrl, metadata);
         return true;
     }
 
-    private WebPage createRedirect(String from, String to, Map<String, String> metadata) {
+    /** Create WebPage object for redirecting URL. */
+    private WebPage createRedirectWebPage(String from, String to, Map<String, String> metadata) {
         WebPage page = new WebPage();
         page.putToOutlinks(new Utf8(to), new Utf8());
         page.putToMetadata(FetcherJob.REDIRECT_DISCOVERED, TableUtil.YES_VAL);
@@ -125,7 +225,8 @@ public class Injector {
         return page;
     }
 
-    private WebPage createWebPage(String url, Map<String, String> metadata) {
+    /** Create WebPage object for a seed URL. */
+    private WebPage createSeedWebPage(String url, Map<String, String> metadata) {
         WebPage webPage = new WebPage();
         float score = defaultScore;
         int interval = defaultInterval;
@@ -158,7 +259,13 @@ public class Injector {
         return webPage;
     }
 
+    /** Collect arguments in a String[]. */
     private static String[] array(String... values) {
         return values;
+    }
+
+    @Override
+    public void close() throws IOException {
+        store.close();
     }
 }
