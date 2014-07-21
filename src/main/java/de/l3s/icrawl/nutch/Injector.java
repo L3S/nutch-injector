@@ -216,12 +216,12 @@ public class Injector implements Closeable {
     /** Create WebPage object for redirecting URL. */
     private WebPage createRedirectWebPage(String from, String to, Map<String, String> metadata) {
         WebPage page = new WebPage();
-        page.putToOutlinks(new Utf8(to), new Utf8());
-        page.putToMetadata(FetcherJob.REDIRECT_DISCOVERED, TableUtil.YES_VAL);
+        page.getOutlinks().put(new Utf8(to), new Utf8());
+        page.getMetadata().put(FetcherJob.REDIRECT_DISCOVERED, TableUtil.YES_VAL);
         page.setReprUrl(new Utf8(to));
         page.setFetchTime(System.currentTimeMillis());
         page.setProtocolStatus(ProtocolStatusUtils.makeStatus(ProtocolStatusCodes.MOVED, to));
-        page.setStatus(CrawlStatus.STATUS_REDIR_PERM);
+        page.setStatus((int) CrawlStatus.STATUS_REDIR_PERM);
         return page;
     }
 
@@ -249,12 +249,12 @@ public class Injector implements Closeable {
             }
             Utf8 writtenKey = new Utf8(key);
             ByteBuffer writtenValue = ByteBuffer.wrap(value.getBytes(UTF_8));
-            webPage.putToMetadata(writtenKey, writtenValue);
+            webPage.getMetadata().put(writtenKey, writtenValue);
         }
         webPage.setScore(score);
         webPage.setFetchInterval(interval);
         webPage.setFetchTime(System.currentTimeMillis());
-        webPage.putToMarkers(DbUpdaterJob.DISTANCE, ZERO_STRING);
+        webPage.getMarkers().put(DbUpdaterJob.DISTANCE, ZERO_STRING);
         Mark.INJECT_MARK.putMark(webPage, YES_STRING);
         return webPage;
     }
@@ -296,7 +296,7 @@ public class Injector implements Closeable {
             return false;
         }
         WebPage page = new WebPage();
-        page.setStatus(CrawlStatus.STATUS_FETCHED);
+        page.setStatus((int) CrawlStatus.STATUS_FETCHED);
         page.setFetchTime(System.currentTimeMillis());
 
         if (content != null) {
@@ -309,11 +309,11 @@ public class Injector implements Closeable {
             for (Map.Entry<String, String> entry : metadata.entrySet()) {
                 Utf8 key = new Utf8(entry.getKey());
                 ByteBuffer value = ByteBuffer.wrap(entry.getValue().getBytes(UTF_8));
-                page.putToMetadata(key, value);
+                page.getMetadata().put(key, value);
             }
         }
 
-        page.putToMarkers(DbUpdaterJob.DISTANCE, ZERO_STRING);
+        page.getMarkers().put(DbUpdaterJob.DISTANCE, ZERO_STRING);
 
         Mark.FETCH_MARK.putMark(page, batchId);
 
