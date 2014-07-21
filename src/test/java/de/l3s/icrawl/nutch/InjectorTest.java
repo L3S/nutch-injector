@@ -35,7 +35,7 @@ public class InjectorTest {
 
     @Test
     public void testHasUrl_true() throws Exception {
-        store.put(TableUtil.reverseUrl(URL), new WebPage());
+        store.put(TableUtil.reverseUrl(URL), WebPage.newBuilder().build());
         boolean hasUrl = injector.hasUrl(URL);
         assertTrue("has URL", hasUrl);
     }

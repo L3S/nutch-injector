@@ -215,7 +215,7 @@ public class Injector implements Closeable {
 
     /** Create WebPage object for redirecting URL. */
     private WebPage createRedirectWebPage(String from, String to, Map<String, String> metadata) {
-        WebPage page = new WebPage();
+        WebPage page = WebPage.newBuilder().build();
         page.getOutlinks().put(new Utf8(to), new Utf8());
         page.getMetadata().put(FetcherJob.REDIRECT_DISCOVERED, TableUtil.YES_VAL);
         page.setReprUrl(new Utf8(to));
@@ -227,7 +227,7 @@ public class Injector implements Closeable {
 
     /** Create WebPage object for a seed URL. */
     private WebPage createSeedWebPage(String url, Map<String, String> metadata) {
-        WebPage webPage = new WebPage();
+        WebPage webPage = WebPage.newBuilder().build();
         float score = defaultScore;
         int interval = defaultInterval;
         for (Map.Entry<String, String> entry : metadata.entrySet()) {
@@ -255,7 +255,7 @@ public class Injector implements Closeable {
         webPage.setFetchInterval(interval);
         webPage.setFetchTime(System.currentTimeMillis());
         webPage.getMarkers().put(DbUpdaterJob.DISTANCE, ZERO_STRING);
-        Mark.INJECT_MARK.putMark(webPage, YES_STRING);
+        webPage.getMarkers().put(Mark.INJECT_MARK.name(), YES_STRING);
         return webPage;
     }
 
@@ -295,7 +295,7 @@ public class Injector implements Closeable {
         if (hasUrl(url)) {
             return false;
         }
-        WebPage page = new WebPage();
+        WebPage page = WebPage.newBuilder().build();
         page.setStatus((int) CrawlStatus.STATUS_FETCHED);
         page.setFetchTime(System.currentTimeMillis());
 
@@ -315,7 +315,7 @@ public class Injector implements Closeable {
 
         page.getMarkers().put(DbUpdaterJob.DISTANCE, ZERO_STRING);
 
-        Mark.FETCH_MARK.putMark(page, batchId);
+        page.getMarkers().put(Mark.FETCH_MARK.name(), batchId);
 
         putRow(url, page, true);
         return true;
