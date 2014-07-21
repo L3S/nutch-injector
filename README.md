@@ -12,6 +12,10 @@ shortened link (t.co/...) and the original link. We want to insert this
 relation into the crawl DB to capture the relation between the two URLs and
 to avoid re-crawling the same URL.
 
+Version compatibility
+---------------------
+
+Only Nutch 2.x is supported. Version `0.1` is compatible with Nutch versions <= 2.2.1. Version `0.2` supports Nutch >= 2.3.
 
 Usage
 -----
@@ -23,7 +27,7 @@ Include the module through Maven:
 	  <dependency>
 	    <groupId>de.l3s.icrawl</groupId>
 	    <artifactId>nutch-injector</artifactId>
-	    <version>0.1</version>
+	    <version>0.2</version>
 	  </dependency>
 	</dependencies>
 	
