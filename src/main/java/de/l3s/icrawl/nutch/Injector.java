@@ -296,6 +296,7 @@ public class Injector implements Closeable {
             return false;
         }
         WebPage page = WebPage.newBuilder().build();
+        page.setReprUrl(new Utf8(url));
         page.setStatus((int) CrawlStatus.STATUS_FETCHED);
         page.setFetchTime(System.currentTimeMillis());
 
