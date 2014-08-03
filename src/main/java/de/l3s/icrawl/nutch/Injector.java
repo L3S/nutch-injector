@@ -85,7 +85,7 @@ public class Injector implements Closeable {
     }
 
     /** Create datastore for crawlId and wrap thrown exceptions. */
-    static DataStore<String, WebPage> createStore(Configuration conf, String crawlId)
+    public static DataStore<String, WebPage> createStore(Configuration conf, String crawlId)
             throws InjectorSetupException {
         try {
             conf.set(Nutch.CRAWL_ID_KEY, crawlId);
