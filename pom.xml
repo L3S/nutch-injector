@@ -17,7 +17,7 @@
     <developerConnection>scm:git:https://github.com/L3S/nutch-injector</developerConnection>
   </scm>
   <properties>
-    <nutch.version>2.3-SNAPSHOT</nutch.version>
+    <nutch.version>2.3-icrawl-1617937</nutch.version>
     <hadoop.version>1.2.0</hadoop.version>
     <gora.version>0.4</gora.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
