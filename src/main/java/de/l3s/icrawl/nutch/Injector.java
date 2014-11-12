@@ -317,6 +317,7 @@ public class Injector implements Closeable {
         page.getMarkers().put(DbUpdaterJob.DISTANCE, ZERO_STRING);
 
         page.getMarkers().put(Mark.FETCH_MARK.name(), batchId);
+        Mark.FETCH_MARK.putMark(page, batchId);
 
         putRow(url, page, true);
         return true;
