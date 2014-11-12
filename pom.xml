@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.l3s.icrawl</groupId>
   <artifactId>nutch-injector</artifactId>
-  <version>0.3</version>
+  <version>0.4-SNAPSHOT</version>
   <name>Nutch URL Injector</name>
   <description>Adds seed URLs and redirect entries directly to a Nutch 2.x crawl DB</description>
   <url>https://github.com/L3S/nutch-injector</url>
