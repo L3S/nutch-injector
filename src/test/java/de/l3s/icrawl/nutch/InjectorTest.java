@@ -6,12 +6,14 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.nutch.storage.WebPage;
 import org.apache.nutch.util.TableUtil;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
+@Ignore
 public class InjectorTest {
 
     private static final String SHORT_URL = "http://t.co/ZNyOoEwAwN";
