@@ -80,6 +80,7 @@ public class Injector implements Closeable {
     public Injector(Configuration conf, DataStore<String, WebPage> store)
             throws InjectorSetupException {
         this.store = store;
+        store.createSchema();
         defaultScore = conf.getFloat("db.score.injected", 1.0f);
         defaultInterval = conf.getInt("db.fetch.interval.default", 2592000);
     }
