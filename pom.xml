@@ -78,17 +78,35 @@
         </configuration>
       </plugin>
     </plugins>
+
+   <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ssh-external</artifactId>
+        <version>1.0</version>
+      </extension>
+    </extensions>
+
   </build>
 
   <distributionManagement>
     <repository>
       <id>icrawl-releases</id>
-      <url>http://maven.l3s.uni-hannover.de:9088/nexus/content/repositories/icrawl_release/</url>
+      <!--<url>http://maven.l3s.uni-hannover.de:9088/nexus/content/repositories/icrawl_release/</url>-->
+      <url>scpexe://fs3.l3s.uni-hannover.de:/home/gossen/public_html/repository/</url>
     </repository>
     <snapshotRepository>
       <id>icrawl-snapshots</id>
-      <url>http://maven.l3s.uni-hannover.de:9088/nexus/content/repositories/icrawl_snapshots/</url>
+      <!-- <url>http://maven.l3s.uni-hannover.de:9088/nexus/content/repositories/icrawl_snapshots/</url> -->
+      <url>scpexe://fs3.l3s.uni-hannover.de:/home/gossen/public_html/repository/</url>
     </snapshotRepository>
   </distributionManagement>
 
+
+  <repositories>
+    <repository>
+      <id>internal</id>
+      <url>http://www.l3s.de/~gossen/repository/</url>
+    </repository>
+  </repositories>
 </project>
