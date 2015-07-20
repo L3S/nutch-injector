@@ -46,7 +46,7 @@ public class Injector implements Closeable {
      * Create injector for the default CrawlDB.
      *
      * @param conf
-     *            the configuration for Nutch & Hadoop
+     *            the configuration for Nutch &amp; Hadoop
      * @throws InjectorSetupException
      *             if we cannot connect to the CrawlDB
      */
@@ -58,9 +58,9 @@ public class Injector implements Closeable {
      * Create injector for the named crawl.
      *
      * @param conf
-     *            the configuration for Nutch & Hadoop
+     *            the configuration for Nutch &amp; Hadoop
      * @param crawlId
-     *            a string refering to an existing CrawlDB.
+     *            a string referring to an existing CrawlDB.
      * @throws InjectorSetupException
      *             if we cannot connect to the CrawlDB
      */
@@ -72,20 +72,28 @@ public class Injector implements Closeable {
      * Create injector for the given CrawlDB,
      *
      * @param conf
-     *            the configuration for Nutch & Hadoop
+     *            the configuration for Nutch &amp; Hadoop
      * @param store
      *            connection to the CrawlDB
-     * @throws InjectorSetupException
      */
-    public Injector(Configuration conf, DataStore<String, WebPage> store)
-            throws InjectorSetupException {
+    public Injector(Configuration conf, DataStore<String, WebPage> store) {
         this.store = store;
         store.createSchema();
         defaultScore = conf.getFloat("db.score.injected", 1.0f);
         defaultInterval = conf.getInt("db.fetch.interval.default", 2592000);
     }
 
-    /** Create datastore for crawlId and wrap thrown exceptions. */
+    /**
+     * Create datastore for crawlId and wrap thrown exceptions.
+     *
+     * @param conf
+     *            Hadoop configuration
+     * @param crawlId
+     *            identifier of the crawl
+     * @return the datastore (never null)
+     * @throws InjectorSetupException
+     *             when store cannot be created
+     * */
     public static DataStore<String, WebPage> createStore(Configuration conf, String crawlId)
             throws InjectorSetupException {
         try {
