@@ -13,7 +13,7 @@
   </organization>
   <scm>
     <url>https://github.com/L3S/nutch-injector</url>
-    <developerConnection>scm:git:https://github.com/L3S/nutch-injector</developerConnection>
+    <developerConnection>scm:git:ssh://git@github.com/L3S/nutch-injector</developerConnection>
   </scm>
   <properties>
     <nutch.version>2.3-icrawl-1617937</nutch.version>
