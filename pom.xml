@@ -93,13 +93,11 @@
   <distributionManagement>
     <repository>
       <id>icrawl-releases</id>
-      <!--<url>http://maven.l3s.uni-hannover.de:9088/nexus/content/repositories/icrawl_release/</url>-->
-      <url>scpexe://fs3.l3s.uni-hannover.de:/home/gossen/public_html/repository/</url>
+      <url>http://maven.l3s.uni-hannover.de:8081/nexus/content/repositories/icrawl_release/</url>
     </repository>
     <snapshotRepository>
       <id>icrawl-snapshots</id>
-      <!-- <url>http://maven.l3s.uni-hannover.de:9088/nexus/content/repositories/icrawl_snapshots/</url> -->
-      <url>scpexe://fs3.l3s.uni-hannover.de:/home/gossen/public_html/repository/</url>
+      <url>http://maven.l3s.uni-hannover.de:8081/nexus/content/repositories/icrawl_snapshot/</url>
     </snapshotRepository>
   </distributionManagement>
 
@@ -107,7 +105,7 @@
   <repositories>
     <repository>
       <id>internal</id>
-      <url>http://www.l3s.de/~gossen/repository/</url>
+      <url>http://maven.l3s.uni-hannover.de:8081/nexus/content/repositories/icrawl_release/</url>
     </repository>
   </repositories>
 </project>
